@@ -13,9 +13,9 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 @Mod(modid = Tags.MODID, version = Tags.VERSION, name = Tags.MODNAME, acceptedMinecraftVersions = "[1.7.10]")
 public class Untranslator {
 
-    public static final Logger LOG = LogManager.getLogger(Tags.MODID);
-
-    @SidedProxy(clientSide = "com.silvermoon.Untranslator.ClientProxy", serverSide = "com.silvermoon.Untranslator.CommonProxy")
+    @SidedProxy(
+        clientSide = "com.silvermoon.Untranslator.ClientProxy",
+        serverSide = "com.silvermoon.Untranslator.CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.EventHandler
