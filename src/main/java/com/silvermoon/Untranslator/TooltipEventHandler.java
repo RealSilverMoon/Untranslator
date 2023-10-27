@@ -33,7 +33,7 @@ public class TooltipEventHandler {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    public String status = "none";
+    public static String status = "none";
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -75,6 +75,15 @@ public class TooltipEventHandler {
             if (aMaterial != null) return aMaterial.getDefaultLocalizedNameForItem(aFormat);
         }
         return aFormat;
+    }
+
+    public void changeStatus() {
+        switch (status) {
+            case "none" -> status = "en_US";
+            case "en_US" -> status = "ja_JP";
+            case "ja_JP" -> status = "none";
+        }
+        Config.saveStatusChange();
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -153,11 +162,7 @@ public class TooltipEventHandler {
                         }
                     cm.update();
                 } else if (btn.enabled && btn.id == 94) {
-                    switch (status) {
-                        case "none" -> status = "en_US";
-                        case "en_US" -> status = "ja_JP";
-                        case "ja_JP" -> status = "none";
-                    }
+                    changeStatus();
                 } else super.actionPerformed(btn);
             }
         };
@@ -210,9 +215,7 @@ public class TooltipEventHandler {
             @Override
             protected void actionPerformed(GuiButton btn) {
                 if (btn.enabled && btn.id == 94) {
-                    if (status.equals("none")) {
-                        status = "en_US";
-                    } else if (status.equals("en_US")) status = "none";
+                    changeStatus();
                 } else super.actionPerformed(btn);
             }
         };

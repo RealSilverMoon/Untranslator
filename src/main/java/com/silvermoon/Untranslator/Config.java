@@ -3,18 +3,29 @@ package com.silvermoon.Untranslator;
 import java.io.File;
 
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
 public class Config {
 
-    public static String greeting = "Hello World";
+    public static Configuration config;
+    public static Property configStatus;
 
     public static void synchronizeConfiguration(File configFile) {
-        Configuration configuration = new Configuration(configFile);
+        config = new Configuration(configFile);
+        config.load();
+        configStatus = config.get(Configuration.CATEGORY_GENERAL, "language", "none", "Second language");
+        TooltipEventHandler.status = configStatus.getString();
+        saveConfig();
+    }
 
-        greeting = configuration.getString("greeting", Configuration.CATEGORY_GENERAL, greeting, "How shall I greet?");
+    public static void saveStatusChange() {
+        configStatus.set(TooltipEventHandler.status);
+        saveConfig();
+    }
 
-        if (configuration.hasChanged()) {
-            configuration.save();
+    public static void saveConfig() {
+        if (config.hasChanged()) {
+            config.save();
         }
     }
 }
