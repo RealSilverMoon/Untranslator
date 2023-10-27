@@ -12,7 +12,7 @@ public class Util {
     }
 
     public static boolean containsGTKeyword(String input) {
-        String regex = "Cable|Frame|Fluid Pipe|Block of";
+        String regex = "Cable|Wire|Frame|Fluid Pipe|Block of";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         return matcher.find();

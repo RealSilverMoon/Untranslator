@@ -2,6 +2,8 @@ package com.silvermoon.Untranslator;
 
 import static com.silvermoon.Untranslator.Util.i18n;
 
+import java.io.File;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
@@ -9,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
 import cpw.mods.fml.common.Loader;
@@ -17,6 +20,7 @@ import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.relauncher.FMLInjectionData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.GregTech_API;
@@ -34,6 +38,7 @@ public class TooltipEventHandler {
     }
 
     public static String status = "none";
+    public static Configuration GTSecondLangFile;
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -53,20 +58,39 @@ public class TooltipEventHandler {
 
     public String getSecondName(ItemStack stack) {
         String key = stack.getUnlocalizedName();
-        // NEI GT Fluid
-        if (stack.getItem() != null && stack.getItem().delegate.name()
-            .equals("gregtech:gt.GregTech_FluidDisplay")) return EnumChatFormatting.GOLD + key;
-        // IC2
-        key = key + (key.startsWith("ic2") ? "" : ".name");
-        // Core method
-        String name = LanguageRegistry.instance()
-            .getStringLocalization(key, status);
-        // Replace GT Materials
-        if (name.contains("%material") && Loader.isModLoaded("gregtech")) {
-            if (Util.containsGTKeyword(name)) name = name.replace("%material ", "");
-            name = getDefaultLocalizedNameForItem(name, stack.getItemDamage() % 1000);
+        String secondName = "";
+        // NEI GT Fluid,GT,GT++
+        if (stack.getItem() != null) {
+            String name = stack.getItem().delegate.name();
+            if (name.equals("gregtech:gt.GregTech_FluidDisplay")) {
+                return EnumChatFormatting.GOLD + key;
+            } else if (name.contains("gregtech:")) {
+                secondName = GTSecondLangFile.get("LanguageFile", key + ".name", "")
+                    .getString();
+            } else if (name.contains("miscutils:")) {
+                secondName = GTSecondLangFile.get("LanguageFile", "gtplusplus." + key + ".name", "")
+                    .getString();
+            }
         }
-        return name.isEmpty() ? name : EnumChatFormatting.AQUA + name;
+        // Core method
+        if (secondName.isEmpty()) secondName = LanguageRegistry.instance()
+            .getStringLocalization(key, status);
+        if (secondName.isEmpty()) secondName = LanguageRegistry.instance()
+            .getStringLocalization(key + ".name", status);
+        // Replace GT Materials
+        if (secondName.contains("%material") && Loader.isModLoaded("gregtech")) {
+            if (Util.containsGTKeyword(secondName)) secondName = secondName.replaceFirst("%material |%material", "");
+            secondName = getDefaultLocalizedNameForItem(secondName, stack.getItemDamage() % 1000);
+        }
+        return secondName.isEmpty() ? secondName : EnumChatFormatting.AQUA + secondName;
+    }
+
+    public static void loadGTLangFile() {
+        File GT_Lang = new File((File) FMLInjectionData.data()[6], "GregTech_" + status.substring(3) + ".lang");
+        if (GT_Lang.exists()) {
+            GTSecondLangFile = new Configuration(GT_Lang);
+            GTSecondLangFile.load();
+        }
     }
 
     public static String getDefaultLocalizedNameForItem(String aFormat, int aMaterialID) {
@@ -83,6 +107,7 @@ public class TooltipEventHandler {
             case "en_US" -> status = "ja_JP";
             case "ja_JP" -> status = "none";
         }
+        loadGTLangFile();
         Config.saveStatusChange();
     }
 
