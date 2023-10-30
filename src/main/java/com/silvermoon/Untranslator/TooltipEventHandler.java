@@ -59,7 +59,7 @@ public class TooltipEventHandler {
                 .getLanguageCode()))
             return;
         if (event == null || event.itemStack == null || event.itemStack.getItem() == null) return;
-        String localizedName = getSecondName(event.itemStack).replaceAll("^(molten\\.|item\\.|tile\\.|Empty\\s)", "");
+        String localizedName = getSecondName(event.itemStack).replaceAll("molten\\.|item\\.|tile\\.|Empty ", "");
         if (localizedName.isEmpty()) return;
         event.toolTip.add(localizedName);
     }
