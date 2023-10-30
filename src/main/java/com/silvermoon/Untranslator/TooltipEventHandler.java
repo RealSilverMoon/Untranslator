@@ -7,12 +7,15 @@ import java.io.File;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.Locale;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+
+import com.google.common.collect.Lists;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
@@ -35,9 +38,14 @@ public class TooltipEventHandler {
 
     public TooltipEventHandler() {
         MinecraftForge.EVENT_BUS.register(this);
+        EN_US.loadLocaleDataFiles(
+            Minecraft.getMinecraft()
+                .getResourceManager(),
+            Lists.newArrayList("en_US"));
     }
 
     public static String status = "none";
+    public static final Locale EN_US = new Locale();
     public static Configuration GTSecondLangFile;
 
     @SideOnly(Side.CLIENT)
@@ -63,7 +71,10 @@ public class TooltipEventHandler {
         if (stack.getItem() != null) {
             String name = stack.getItem().delegate.name();
             if (name.equals("gregtech:gt.GregTech_FluidDisplay")) {
-                return EnumChatFormatting.GOLD + key;
+                String nbtKey = stack.stackTagCompound.getString("mFluidMaterialName");
+                return EnumChatFormatting.GOLD + (nbtKey.isEmpty() ? key : nbtKey);
+            } else if (name.equals("ae2fc:fluid_drop")) {
+                return EnumChatFormatting.GOLD + stack.stackTagCompound.getString("Fluid");
             } else if (name.contains("gregtech:")) {
                 secondName = GTSecondLangFile.get("LanguageFile", key + ".name", "")
                     .getString();
@@ -82,6 +93,7 @@ public class TooltipEventHandler {
             if (Util.containsGTKeyword(secondName)) secondName = secondName.replaceFirst("%material |%material", "");
             secondName = getDefaultLocalizedNameForItem(secondName, stack.getItemDamage() % 1000);
         }
+        if (secondName.isEmpty()) secondName = EN_US.formatMessage(key, new Object[0]);
         return secondName.isEmpty() ? secondName : EnumChatFormatting.AQUA + secondName;
     }
 
