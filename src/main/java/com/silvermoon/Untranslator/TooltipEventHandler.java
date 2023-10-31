@@ -45,6 +45,7 @@ public class TooltipEventHandler {
     }
 
     public static String status = "none";
+    public static String location = "name";
     public static final Locale EN_US = new Locale();
     public static Configuration GTSecondLangFile;
 
@@ -61,7 +62,33 @@ public class TooltipEventHandler {
         if (event == null || event.itemStack == null || event.itemStack.getItem() == null) return;
         String localizedName = getSecondName(event.itemStack).replaceAll("molten\\.|item\\.|tile\\.|Empty ", "");
         if (localizedName.isEmpty()) return;
-        event.toolTip.add(localizedName);
+        switch (location) {
+            case "name" -> {
+                if (event.itemStack.getItem().delegate.name()
+                    .equals("gregtech:gt.GregTech_FluidDisplay")) {
+                    event.toolTip.add(localizedName);
+                    return;
+                }
+                if (event.itemStack.getDisplayName()
+                    .contains(localizedName)) {
+                    event.toolTip.set(
+                        0,
+                        event.toolTip.get(0)
+                            .replaceFirst("§o", ""));
+                    return;
+                }
+                event.itemStack
+                    .setStackDisplayName(event.itemStack.getDisplayName() + " §r(%§r)".replace("%", localizedName));
+            }
+            case "below" -> {
+                removeName(event.itemStack, localizedName);
+                event.toolTip.add(1, localizedName);
+            }
+            case "bottom" -> {
+                removeName(event.itemStack, localizedName);
+                event.toolTip.add(localizedName);
+            }
+        }
     }
 
     public String getSecondName(ItemStack stack) {
@@ -113,6 +140,21 @@ public class TooltipEventHandler {
         return aFormat;
     }
 
+    public void removeName(ItemStack itemStack, String localizedName) {
+        if (!itemStack.hasDisplayName()) return;
+        if (!itemStack.getDisplayName()
+            .contains(localizedName)) return;
+        String s = itemStack.getDisplayName()
+            .replace(" §r(%§r)".replace("%", localizedName), "");
+        if (s.equals(
+            itemStack.getItem()
+                .getItemStackDisplayName(itemStack))) {
+            itemStack.stackTagCompound.removeTag("display");
+        } else {
+            itemStack.setStackDisplayName(s);
+        }
+    }
+
     public void changeStatus() {
         switch (status) {
             case "none" -> status = "en_US";
@@ -120,7 +162,16 @@ public class TooltipEventHandler {
             case "ja_JP" -> status = "none";
         }
         loadGTLangFile();
-        Config.saveStatusChange();
+        Config.saveChange();
+    }
+
+    public void changeLocation() {
+        switch (location) {
+            case "name" -> location = "below";
+            case "below" -> location = "bottom";
+            case "bottom" -> location = "name";
+        }
+        Config.saveChange();
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -141,6 +192,7 @@ public class TooltipEventHandler {
         e.gui = new GuiLanguageEx((GuiLanguage) e.gui) {
 
             public GuiButton doubleButton;
+            public GuiButton locationButton;
 
             @Override
             public void initGui() {
@@ -148,6 +200,7 @@ public class TooltipEventHandler {
                 GuiOptionButton btnUnicode = (GuiOptionButton) this.buttonList.get(0);
                 GuiOptionButton btnDone = (GuiOptionButton) this.buttonList.get(1);
                 doubleButton = new GuiButton(94, this.width / 2 + 2, this.height - 28, 150, 20, "");
+                locationButton = new GuiButton(95, this.width / 2 + 154, this.height - 28, 40, 20, "");
                 btnFixFont = new GuiButton(93, this.width / 2 + 2, this.height - 52, 150, 20, "");
                 btnDone.yPosition = this.height - 28;
                 btnDone.xPosition = this.width / 2 - 150 - 2;
@@ -155,6 +208,7 @@ public class TooltipEventHandler {
                 btnUnicode.xPosition = this.width / 2 - 150 - 2;
                 this.buttonList.add(doubleButton);
                 this.buttonList.add(btnFixFont);
+                this.buttonList.add(locationButton);
             }
 
             @Override
@@ -179,6 +233,7 @@ public class TooltipEventHandler {
                         "options.unicodefontfixer.fixDerpyFont."
                             + UnicodeFontFixer.instance.configManager.fixDerpyFont.getString());
                 doubleButton.displayString = i18n("Untranslator.display_second") + i18n("Untranslator." + status);
+                locationButton.displayString = i18n("Untranslator." + location);
             }
 
             @Override
@@ -200,6 +255,8 @@ public class TooltipEventHandler {
                     cm.update();
                 } else if (btn.enabled && btn.id == 94) {
                     changeStatus();
+                } else if (btn.enabled && btn.id == 95) {
+                    changeLocation();
                 } else super.actionPerformed(btn);
             }
         };
@@ -215,6 +272,7 @@ public class TooltipEventHandler {
                 .getPrivateValue(GuiLanguage.class, (GuiLanguage) e.gui, new String[] { "field_146454_h" })) {
 
             public GuiButton doubleButton;
+            public GuiButton locationButton;
 
             @Override
             public void initGui() {
@@ -222,11 +280,13 @@ public class TooltipEventHandler {
                 GuiOptionButton btnUnicode = (GuiOptionButton) this.buttonList.get(0);
                 GuiOptionButton btnDone = (GuiOptionButton) this.buttonList.get(1);
                 doubleButton = new GuiButton(94, this.width / 2 + 2, this.height - 52, 150, 20, "");
+                locationButton = new GuiButton(95, this.width / 2 + 154, this.height - 52, 40, 20, "");
                 btnDone.yPosition = this.height - 28;
                 btnDone.xPosition = this.width / 2 - 75;
                 btnUnicode.yPosition = this.height - 52;
                 btnUnicode.xPosition = this.width / 2 - 150 - 2;
                 this.buttonList.add(doubleButton);
+                this.buttonList.add(locationButton);
             }
 
             @Override
@@ -247,13 +307,16 @@ public class TooltipEventHandler {
 
             private void updateButtonText() {
                 doubleButton.displayString = i18n("Untranslator.display_second") + i18n("Untranslator." + status);
+                locationButton.displayString = i18n("Untranslator.display_location" + i18n("Untranslator." + location));
             }
 
             @Override
             protected void actionPerformed(GuiButton btn) {
                 if (btn.enabled && btn.id == 94) {
                     changeStatus();
-                } else super.actionPerformed(btn);
+                } else if (btn.enabled && btn.id == 95) {
+                    changeLocation();
+                }
             }
         };
     }
