@@ -65,7 +65,7 @@ public class TooltipEventHandler {
         switch (location) {
             case "name" -> {
                 if (event.itemStack.getItem().delegate.name()
-                    .equals("gregtech:gt.GregTech_FluidDisplay")) {
+                    .equals("ae2fc:fluid_drop")) {
                     event.toolTip.add(localizedName);
                     return;
                 }
