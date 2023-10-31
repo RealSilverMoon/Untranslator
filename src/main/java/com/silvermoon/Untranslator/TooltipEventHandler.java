@@ -307,7 +307,7 @@ public class TooltipEventHandler {
 
             private void updateButtonText() {
                 doubleButton.displayString = i18n("Untranslator.display_second") + i18n("Untranslator." + status);
-                locationButton.displayString = i18n("Untranslator.display_location" + i18n("Untranslator." + location));
+                locationButton.displayString = i18n("Untranslator." + location);
             }
 
             @Override
