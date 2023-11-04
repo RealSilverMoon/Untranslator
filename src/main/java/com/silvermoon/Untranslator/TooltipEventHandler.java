@@ -98,8 +98,8 @@ public class TooltipEventHandler {
         if (stack.getItem() != null) {
             String name = stack.getItem().delegate.name();
             if (name.equals("gregtech:gt.GregTech_FluidDisplay")) {
-                String nbtKey="";
-                if(stack.stackTagCompound != null) {
+                String nbtKey = "";
+                if (stack.stackTagCompound != null) {
                     nbtKey = stack.stackTagCompound.getString("mFluidMaterialName");
                 }
                 return EnumChatFormatting.GOLD + (nbtKey.isEmpty() ? key : nbtKey);
