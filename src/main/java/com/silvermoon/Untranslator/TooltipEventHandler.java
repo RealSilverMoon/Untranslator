@@ -104,7 +104,11 @@ public class TooltipEventHandler {
                 }
                 return EnumChatFormatting.GOLD + (nbtKey.isEmpty() ? key : nbtKey);
             } else if (name.equals("ae2fc:fluid_drop")) {
-                return EnumChatFormatting.GOLD + stack.stackTagCompound.getString("Fluid");
+                String nbtKey = "";
+                if (stack.stackTagCompound != null) {
+                    nbtKey = stack.stackTagCompound.getString("Fluid");
+                }
+                return EnumChatFormatting.GOLD + (nbtKey.isEmpty() ? key : nbtKey);
             } else if (name.contains("gregtech:")) {
                 secondName = GTSecondLangFile.get("LanguageFile", key + ".name", "")
                     .getString();
