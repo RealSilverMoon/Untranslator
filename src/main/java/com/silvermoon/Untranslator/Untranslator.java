@@ -13,12 +13,13 @@ public class Untranslator {
     @SideOnly(Side.CLIENT)
     public void preInit(FMLPreInitializationEvent event) {
         Config.synchronizeConfiguration(event.getSuggestedConfigurationFile());
-        TooltipEventHandler.loadGTLangFile();
+        Util.loadGTLangFile();
     }
 
     @Mod.EventHandler
     @SideOnly(Side.CLIENT)
     public void init(FMLInitializationEvent e) {
         new TooltipEventHandler();
+        Util.exFileFromJar();
     }
 }

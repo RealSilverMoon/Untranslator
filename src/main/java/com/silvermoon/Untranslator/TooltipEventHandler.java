@@ -2,14 +2,13 @@ package com.silvermoon.Untranslator;
 
 import static com.silvermoon.Untranslator.Util.i18n;
 
-import java.io.File;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.Locale;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -23,7 +22,6 @@ import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.FMLInjectionData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.GregTech_API;
@@ -42,11 +40,16 @@ public class TooltipEventHandler {
             Minecraft.getMinecraft()
                 .getResourceManager(),
             Lists.newArrayList("en_US"));
+        JA_JP.loadLocaleDataFiles(
+            Minecraft.getMinecraft()
+                .getResourceManager(),
+            Lists.newArrayList("ja_JP"));
     }
 
     public static String status = "none";
     public static String location = "name";
     public static final Locale EN_US = new Locale();
+    public static final Locale JA_JP = new Locale();
     public static Configuration GTSecondLangFile;
 
     @SideOnly(Side.CLIENT)
@@ -110,11 +113,13 @@ public class TooltipEventHandler {
                 }
                 return EnumChatFormatting.GOLD + (nbtKey.isEmpty() ? key : nbtKey);
             } else if (name.contains("gregtech:")) {
-                secondName = GTSecondLangFile.get("LanguageFile", key + ".name", "")
-                    .getString();
+                secondName = GTSecondLangFile == null ? i18n("Untranslator.error")
+                    : GTSecondLangFile.get("LanguageFile", key + ".name", "")
+                        .getString();
             } else if (name.contains("miscutils:")) {
-                secondName = GTSecondLangFile.get("LanguageFile", "gtplusplus." + key + ".name", "")
-                    .getString();
+                secondName = GTSecondLangFile == null ? i18n("Untranslator.error")
+                    : GTSecondLangFile.get("LanguageFile", "gtplusplus." + key + ".name", "")
+                        .getString();
             }
         }
         // Core method
@@ -124,25 +129,22 @@ public class TooltipEventHandler {
             .getStringLocalization(key + ".name", status);
         // Replace GT Materials
         if (secondName.contains("%material") && Loader.isModLoaded("gregtech")) {
-            if (Util.containsGTKeyword(secondName)) secondName = secondName.replaceFirst("%material |%material", "");
-            secondName = getDefaultLocalizedNameForItem(secondName, stack.getItemDamage() % 1000);
+            secondName = replaceMaterials(secondName, stack.getItemDamage() % 1000);
         }
-        if (secondName.isEmpty()) secondName = EN_US.formatMessage(key, new Object[0]);
+        if (secondName.isEmpty()) {
+            switch (status) {
+                case "en_US" -> secondName = EN_US.formatMessage(key, new Object[0]);
+                case "ja_JP" -> secondName = JA_JP.formatMessage(key, new Object[0]);
+            }
+        }
         return secondName.isEmpty() ? secondName : EnumChatFormatting.AQUA + secondName;
     }
 
-    public static void loadGTLangFile() {
-        File GT_Lang = new File((File) FMLInjectionData.data()[6], "GregTech_" + status.substring(3) + ".lang");
-        if (GT_Lang.exists()) {
-            GTSecondLangFile = new Configuration(GT_Lang);
-            GTSecondLangFile.load();
-        }
-    }
-
-    public static String getDefaultLocalizedNameForItem(String aFormat, int aMaterialID) {
+    public static String replaceMaterials(String aFormat, int aMaterialID) {
         if (aMaterialID >= 0 && aMaterialID < 1000) {
             Materials aMaterial = GregTech_API.sGeneratedMaterials[aMaterialID];
-            if (aMaterial != null) return aMaterial.getDefaultLocalizedNameForItem(aFormat);
+            return aFormat.replaceAll("%material |%material",
+                    aMaterial==null?"":GTSecondLangFile.get("LanguageFile", "Material."+aMaterial.mName.toLowerCase(), "").getString());
         }
         return aFormat;
     }
@@ -168,7 +170,7 @@ public class TooltipEventHandler {
             case "en_US" -> status = "ja_JP";
             case "ja_JP" -> status = "none";
         }
-        loadGTLangFile();
+        Util.loadGTLangFile();
         Config.saveChange();
     }
 
