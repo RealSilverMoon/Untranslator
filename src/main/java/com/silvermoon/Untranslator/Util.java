@@ -1,8 +1,6 @@
 package com.silvermoon.Untranslator;
 
 import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Configuration;

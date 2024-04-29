@@ -8,7 +8,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.Locale;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -143,8 +142,11 @@ public class TooltipEventHandler {
     public static String replaceMaterials(String aFormat, int aMaterialID) {
         if (aMaterialID >= 0 && aMaterialID < 1000) {
             Materials aMaterial = GregTech_API.sGeneratedMaterials[aMaterialID];
-            return aFormat.replaceAll("%material |%material",
-                    aMaterial==null?"":GTSecondLangFile.get("LanguageFile", "Material."+aMaterial.mName.toLowerCase(), "").getString());
+            return aFormat.replaceAll(
+                "%material |%material",
+                aMaterial == null ? ""
+                    : GTSecondLangFile.get("LanguageFile", "Material." + aMaterial.mName.toLowerCase(), "")
+                        .getString());
         }
         return aFormat;
     }
