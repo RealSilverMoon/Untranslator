@@ -20,6 +20,5 @@ public class Untranslator {
     @SideOnly(Side.CLIENT)
     public void init(FMLInitializationEvent e) {
         new TooltipEventHandler();
-        Util.exFileFromJar();
     }
 }
