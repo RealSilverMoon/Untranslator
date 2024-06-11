@@ -327,7 +327,7 @@ public class TooltipEventHandler {
                     changeStatus();
                 } else if (btn.enabled && btn.id == 95) {
                     changeLocation();
-                }
+                } else super.actionPerformed(btn);
             }
         };
     }
