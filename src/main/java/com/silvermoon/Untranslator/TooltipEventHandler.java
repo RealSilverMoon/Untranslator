@@ -23,7 +23,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import gregtech.api.GregTech_API;
+import gregtech.api.GregTechAPI;
 import gregtech.api.enums.Materials;
 import unicodefontfixer.ConfigManager;
 import unicodefontfixer.FontRendererEx;
@@ -141,7 +141,7 @@ public class TooltipEventHandler {
 
     public static String replaceMaterials(String aFormat, int aMaterialID) {
         if (aMaterialID >= 0 && aMaterialID < 1000) {
-            Materials aMaterial = GregTech_API.sGeneratedMaterials[aMaterialID];
+            Materials aMaterial = GregTechAPI.sGeneratedMaterials[aMaterialID];
             return aFormat.replaceAll(
                 "%material |%material",
                 aMaterial == null ? ""
