@@ -43,6 +43,7 @@ public class TooltipEventHandler {
             Minecraft.getMinecraft()
                 .getResourceManager(),
             Lists.newArrayList("ja_JP"));
+        if(Loader.isModLoaded("RotaryCraft")) rotaryCraftNameHelper=new RotaryCraftNameHelper();
     }
 
     public static String status = "none";
@@ -50,6 +51,7 @@ public class TooltipEventHandler {
     public static final Locale EN_US = new Locale();
     public static final Locale JA_JP = new Locale();
     public static Configuration GTSecondLangFile;
+    private RotaryCraftNameHelper rotaryCraftNameHelper;
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -119,6 +121,8 @@ public class TooltipEventHandler {
                 secondName = GTSecondLangFile == null ? i18n("Untranslator.error")
                     : GTSecondLangFile.get("LanguageFile", "gtplusplus." + key + ".name", "")
                         .getString();
+            }else if(name.contains("RotaryCraft") && rotaryCraftNameHelper!=null){
+                secondName=rotaryCraftNameHelper.getRotaryCraftName(stack);
             }
         }
         // Core method
